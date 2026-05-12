@@ -58,18 +58,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "editing:build"
+            "buildTarget": "editing:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "editing:build:production"
+              "buildTarget": "editing:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "editing:build"
+            "buildTarget": "editing:build"
           }
         },
         "test": {
@@ -133,5 +133,8 @@
       }
     }
   },
-  "defaultProject": "editing"
+  "defaultProject": "editing",
+  "cli": {
+    "analytics": "18303077-2711-4d0d-984a-85cfd50dc53b"
+  }
 }
