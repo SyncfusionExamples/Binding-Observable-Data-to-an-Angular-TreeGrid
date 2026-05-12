@@ -1,11 +1,13 @@
 import { Injectable } from "@angular/core";
-import { InMemoryDbService } from "angular-in-memory-web-api";
+import { InMemoryDbService, RequestInfo } from "angular-in-memory-web-api";
 import { TaskModel } from "./task-model";
 
 @Injectable({
   providedIn: "root"
 })
 export class TaskDataService implements InMemoryDbService {
+  private db: { tasks: TaskModel[] } | null = null;
+
   constructor() {}
 
   createDb() {
@@ -111,6 +113,53 @@ export class TaskDataService implements InMemoryDbService {
         isParent: false
       }
     ];
-    return { tasks };
+    
+    if (!this.db) {
+      this.db = { tasks };
+    }
+    return this.db;
+  }
+
+  // Handle POST requests (Create)
+  post(reqInfo: RequestInfo) {
+    if (reqInfo.collection === 'tasks') {
+      const newTask = reqInfo.utils.getJsonBody(reqInfo.req);
+      const db = this.createDb();
+      const maxId = db.tasks.reduce((max, task) => Math.max(max, task.id as number), 0);
+      newTask.id = maxId + 1;
+      db.tasks.push(newTask);
+      return reqInfo.utils.createResponse$(() => ({ status: 200, body: newTask }));
+    }
+    return undefined;
+  }
+
+  // Handle PUT requests (Update)
+  put(reqInfo: RequestInfo) {
+    if (reqInfo.collection === 'tasks') {
+      const db = this.createDb();
+      const id = reqInfo.id;
+      const updatedTask = reqInfo.utils.getJsonBody(reqInfo.req);
+      const index = db.tasks.findIndex(t => t.id === id);
+      if (index > -1) {
+        db.tasks[index] = { ...db.tasks[index], ...updatedTask };
+      }
+      return reqInfo.utils.createResponse$(() => ({ status: 200, body: db.tasks[index] }));
+    }
+    return undefined;
+  }
+
+  // Handle DELETE requests
+  delete(reqInfo: RequestInfo) {
+    if (reqInfo.collection === 'tasks') {
+      const db = this.createDb();
+      const id = reqInfo.id;
+      const index = db.tasks.findIndex(t => t.id === id);
+      if (index > -1) {
+        const deletedTask = db.tasks[index];
+        db.tasks.splice(index, 1);
+        return reqInfo.utils.createResponse$(() => ({ status: 200, body: deletedTask }));
+      }
+    }
+    return undefined;
   }
 }

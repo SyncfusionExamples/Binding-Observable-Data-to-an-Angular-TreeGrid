@@ -30,8 +30,8 @@ export class TaskStoreService extends Subject<DataStateChangeEventArgs> {
         (response: any) =>
           <any>{
             result:
-              state.take > 0
-                ? response.slice(state.skip, state.take)
+              state && state.take > 0
+                ? response.slice(state.skip, state.skip + state.take)
                 : response,
             count: response.length
           }
